@@ -8,7 +8,7 @@
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground: #ededed;
+    --foreground: #000000; /* karanlık temada yazıların görünmesi için */
     --background-color: #f97316;
   }
 }
