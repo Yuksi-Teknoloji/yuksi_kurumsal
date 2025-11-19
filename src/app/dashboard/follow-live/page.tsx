@@ -542,7 +542,7 @@ export default function CorporateFollowLivePage() {
       <section className="overflow-x-auto border-t border-neutral-200/70 bg-white rounded-xl shadow-sm">
         {" "}
         {/* Tam ekran için sipariş listesini ayırdım */}
-        <div className="flex flex-wrap gap-3 px-4 py-3">
+        <div className="flex flex-wrap h-91 gap-3 overflow-y-auto pb-1">
           {" "}
           {/* görüntü bozulmasın diye wrap */}
           {filtered.map((o) => {
