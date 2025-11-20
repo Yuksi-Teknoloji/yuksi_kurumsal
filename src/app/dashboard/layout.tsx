@@ -3,9 +3,6 @@ import DashboardShell from "@/src/components/dashboard/Shell";
 import Header from "@/src/components/dashboard/Header";
 import Sidebar from "@/src/components/dashboard/Sidebar";
 import { navForRole } from "@/src/app/config/nav";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { decodeJwt, isExpired, roleSegment } from "@/src/utils/jwt";
 import "@/src/styles/soft-ui.css";
 
 export default async function CorporateLayout({
@@ -13,25 +10,6 @@ export default async function CorporateLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
-
-  if (!token) {
-    redirect("/");
-  }
-
-  const claims = decodeJwt(token);
-
-  if (!claims || isExpired(claims)) {
-    redirect("/");
-  }
-
-  const role = String(roleSegment(claims.userType) || "").toLowerCase();
-
-  if (role !== "corporate") {
-    redirect("/");
-  }
-
   const nav = navForRole("corporate");
 
   return (
