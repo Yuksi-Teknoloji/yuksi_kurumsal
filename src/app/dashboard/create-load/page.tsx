@@ -107,7 +107,7 @@ export default function CorporateCreateLoadPage() {
   const [specialNotes, setSpecialNotes] = React.useState("");
 
   const [coupon, setCoupon] = React.useState("");
-  const [couponApplied, setCouponApplied] = React.useState("");
+  const [couponApplied, setCouponApplied] = React.useState<string | null>("");
 
   const [extraFlags, setExtraFlags] = React.useState<
     Record<ExtraServiceKey, boolean>
@@ -131,7 +131,7 @@ export default function CorporateCreateLoadPage() {
     "cash" | "card" | "transfer" | ""
   >("");
 
-  const [imageFileIds, setImageFileIds] = React.useState<string[]>("");
+  const [imageFileIds, setImageFileIds] = React.useState<string[]>([]);
   const [newImageId, setNewImageId] = React.useState("");
 
   const toggleExtra = (k: ExtraServiceKey) =>
@@ -216,7 +216,7 @@ export default function CorporateCreateLoadPage() {
         headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify(body),
       });
-      const j = await readJson(res);
+      const j = await readJson<any>(res);
       if (!res.ok || j?.success === false) {
         throw new Error(collectErrors(j) || pickMsg(j, `HTTP ${res.status}`));
       }
@@ -241,7 +241,7 @@ export default function CorporateCreateLoadPage() {
       setNewImageId("");
       setCarrierType("courier");
       setVehicleType("motorcycle");
-    } catch (e: Error) {
+    } catch (e: any) {
       setErrMsg(e?.message || "Kayıt oluşturulamadı.");
     } finally {
       setBusy(false);
