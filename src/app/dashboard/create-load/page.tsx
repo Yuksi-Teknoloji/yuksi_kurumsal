@@ -69,8 +69,7 @@ function collectErrors(x: any): string {
   return msgs.join(" | ");
 }
 
-const fmtDT = (iso?: string | null) =>
-  iso ? new Date(iso).toLocaleString("tr-TR") : "—";
+const toTRDate = (d: string) => (d ? d.split('-').reverse().join('.') : '');
 const toTRTime = (t: string) => t || "";
 const toNum = (v: unknown) => {
   if (typeof v === "number") return v;
@@ -189,7 +188,7 @@ export default function CorporateCreateLoadPage() {
       carrierType,
       deliveryType: deliveryTypeAPI,
       deliveryDate:
-        deliveryTypeAPI === "scheduled" ? fmtDT(schedDate) : undefined,
+        deliveryTypeAPI === "scheduled" ? toTRDate(schedDate) : undefined,
       deliveryTime:
         deliveryTypeAPI === "scheduled" ? toTRTime(schedTime) : undefined,
 
@@ -197,7 +196,7 @@ export default function CorporateCreateLoadPage() {
       dropoffCoordinates: [toNum(dLat), toNum(dLng)],
 
       pickupAddress: pickupAddress,
-      pickupCoordinates: [toNum(dLat), toNum(dLng)],
+      pickupCoordinates: [toNum(pLat), toNum(pLng)],
 
       extraServices,
       extraServicesTotal: extrasTotal,
