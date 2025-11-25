@@ -392,47 +392,96 @@ function FitBounds({ start, end }: { start: LatLng; end: LatLng }) {
 }
 
 function RouteMap({ start, end }: { start: LatLng; end: LatLng }) {
+  const [points, setPoints] = React.useState<[number, number][]>([]);
+  const [routeError, setRouteError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const fetchRoute = async () => {
+      setRouteError(null);
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson&alternatives=false&steps=false`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
+        const j: any = await readJson(res);
+        const coords: [number, number][] =
+          j?.routes?.[0]?.geometry?.coordinates?.map((c: [number, number]) => [
+            c[1],
+            c[0],
+          ]) ?? [];
+        if (!coords.length) throw new Error("Rota bulunmadı");
+        if (!cancelled) setPoints(coords);
+      } catch (e: any) {
+        console.error("OSRM route error, failing back to straight line:", e);
+        if (!cancelled) {
+          setRouteError("Rota hesaplanamadı, kuş uçuşu çizgi gösteriliyor.");
+          setPoints([
+            [start.lat, start.lng],
+            [end.lat, end.lng],
+          ]);
+        }
+      }
+    };
+
+    fetchRoute();
+    return () => {
+      cancelled = true;
+    };
+  }, [start.lat, start.lng, end.lat, end.lng]);
+
   const center: [number, number] = [
     (start.lat + end.lat) / 2,
     (start.lng + end.lng) / 2,
   ];
+  const polyPositions = point.length
+    ? (points as [number, number][])
+    : ([
+        [start.lat, start.lng],
+        [end.lat, end.lng],
+      ] as [number, number][]);
+
   return (
-    <MapContainer
-      center={center}
-      zoom={12}
-      style={{ width: "100%", height: "100%" }}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
-      />
-      <FitBounds start={start} end={end} />
-      <CircleMarker
-        center={[start.lat, start.lng]}
-        radius={8}
-        pathOptions={{ color: "#22c55e", weight: 3, fillOpacity: 0.9 }}
+    <>
+      {routeError && (
+        <div className="px-3 py-2 text-xs text-amber-700 bg-amber-50 border-b border-amber-200">
+          {routeError}
+        </div>
+      )}
+      <MapContainer
+        center={center}
+        zoom={12}
+        style={{ width: "100%", height: "100%" }}
       >
-        <Tooltip direction="top" offset={[0, -6]} opacity={1}>
-          Alım Noktası
-        </Tooltip>
-      </CircleMarker>
-      <CircleMarker
-        center={[end.lat, end.lng]}
-        radius={8}
-        pathOptions={{ color: "#ef4444", weight: 3, fillOpacity: 0.9 }}
-      >
-        <Tooltip direction="top" offset={[0, -6]} opacity={1}>
-          Teslim Noktası
-        </Tooltip>
-      </CircleMarker>
-      {/* Basit rota görünümü: iki nokta arası çizgi */}
-      <Polyline
-        positions={[
-          [start.lat, start.lng],
-          [end.lat, end.lng],
-        ]}
-        pathOptions={{ weight: 4, opacity: 0.8 }}
-      />
-    </MapContainer>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="&copy; OpenStreetMap contributors"
+        />
+        <FitBounds start={start} end={end} />
+        <CircleMarker
+          center={[start.lat, start.lng]}
+          radius={8}
+          pathOptions={{ color: "#22c55e", weight: 3, fillOpacity: 0.9 }}
+        >
+          <Tooltip direction="top" offset={[0, -6]} opacity={1}>
+            Alım Noktası
+          </Tooltip>
+        </CircleMarker>
+        <CircleMarker
+          center={[end.lat, end.lng]}
+          radius={8}
+          pathOptions={{ color: "#ef4444", weight: 3, fillOpacity: 0.9 }}
+        >
+          <Tooltip direction="top" offset={[0, -6]} opacity={1}>
+            Teslim Noktası
+          </Tooltip>
+        </CircleMarker>
+        {/* Basit rota görünümü: iki nokta arası çizgi */}
+        <Polyline
+          positions={polyPositions}
+          pathOptions={{ weight: 4, opacity: 0.85 }}
+        />
+      </MapContainer>
+    </>
   );
 }
