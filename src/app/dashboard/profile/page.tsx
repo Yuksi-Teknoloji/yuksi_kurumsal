@@ -270,7 +270,7 @@ export default function CorporateProfilePage() {
                                 onChange={onChange("firstName")}
                                 disabled={!editing.firstName}
                                 />
-                                <EditButton onclick={() => toggle("firstName")} active={editing.firstName}/>
+                                <EditButton onClick={() => toggle("firstName")} active={editing.firstName}/>
                             </Row>
                             <Row>
                                 <input 
@@ -280,7 +280,7 @@ export default function CorporateProfilePage() {
                                 onChange={onChange("lastName")}
                                 disabled={!editing.lastName}
                                 />
-                                <EditButton onclick={() => toggle("lastName")} active={editing.lastName}/>
+                                <EditButton onClick={() => toggle("lastName")} active={editing.lastName}/>
                             </Row>
                             <Row>
                                 <input 
@@ -290,7 +290,7 @@ export default function CorporateProfilePage() {
                                 onChange={onChange("resume")}
                                 disabled={!editing.resume}
                                 />
-                                <EditButton onclick={() => toggle("resume")} active={editing.firstName}/>
+                                <EditButton onClick={() => toggle("resume")} active={editing.firstName}/>
                             </Row>
                         </Block>
                         <Block title="İletişim & Adres">
@@ -302,7 +302,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("phone")}
                             disabled={!editing.phone}
                             />
-                            <EditButton onclick={() => toggle("phone")} active={editing.phone}/>
+                            <EditButton onClick={() => toggle("phone")} active={editing.phone}/>
                             </Row>
                             <Row>
                             <input 
@@ -312,7 +312,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("email")}
                             disabled={!editing.email}
                             />
-                            <EditButton onclick={() => toggle("email")} active={editing.email}/>
+                            <EditButton onClick={() => toggle("email")} active={editing.email}/>
                             </Row>
                             <Row>
                             <textarea
@@ -323,7 +323,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("fullAddress")}
                             disabled={!editing.fullAddress}
                             />
-                            <EditButton onclick={() => toggle("fullAddress")} active={editing.fullAddress}/>
+                            <EditButton onClick={() => toggle("fullAddress")} active={editing.fullAddress}/>
                             </Row>
                         </Block>
 
@@ -336,7 +336,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("tax_office")}
                             disabled={!editing.tax_office}
                             />
-                            <EditButton onclick={() => toggle("tax_office")} active={editing.tax_office}/>
+                            <EditButton onClick={() => toggle("tax_office")} active={editing.tax_office}/>
                             </Row>
                             <Row>
                             <input 
@@ -346,7 +346,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("tax_number")}
                             disabled={!editing.tax_number}
                             />
-                            <EditButton onclick={() => toggle("tax_number")} active={editing.tax_number}/>
+                            <EditButton onClick={() => toggle("tax_number")} active={editing.tax_number}/>
                             </Row>
                             <Row>
                             <input 
@@ -356,7 +356,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("iban")}
                             disabled={!editing.iban}
                             />
-                            <EditButton onclick={() => toggle("iban")} active={editing.iban}/>
+                            <EditButton onClick={() => toggle("iban")} active={editing.iban}/>
                             </Row>
                         </Block>
                         <Block title="Konum">
@@ -370,7 +370,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("latitude")}
                             disabled={!editing.latitude}
                             />
-                            <EditButton onclick={() => toggle("latitude")} active={editing.latitude}/>
+                            <EditButton onClick={() => toggle("latitude")} active={editing.latitude}/>
                             </Row>
                             <Row>
                             <input
@@ -382,7 +382,7 @@ export default function CorporateProfilePage() {
                             onChange={onChange("longitude")}
                             disabled={!editing.longitude}
                             />
-                            <EditButton onclick={() => toggle("longitude")} active={editing.longitude}/>
+                            <EditButton onClick={() => toggle("longitude")} active={editing.longitude}/>
                             </Row>
 
                             <div className="mt-3">
@@ -470,7 +470,7 @@ function Row({ children }: {children: React.ReactNode }) {
     return <div className="grid grid-cols-[1fr_auto] items-center gap-3">{children}</div>
 }
 
-function EditButton({ onClick, active }: {onclick: () => void; active: boolean}) {
+function EditButton({ onClick, active }: {onClick: () => void; active: boolean}) {
     return(
         <button 
         type="button"
