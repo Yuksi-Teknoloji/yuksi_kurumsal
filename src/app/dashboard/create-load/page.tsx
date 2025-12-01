@@ -72,6 +72,23 @@ type VehicleProductUI = {
   template: string;
 };
 
+type CommissionMeDTO = {
+  id: string;
+  userType?: string;
+  name?: string;
+  surname?: string;
+  commissionRate?: number | null;
+  commissionDescription?: number | null;
+};
+
+type CommissionMeResponse = {
+  success?: boolean;
+  message?: string;
+  data?: CommissionMeDTO;
+};
+
+type JwtPayload = { userId?: string; sub?: string; [k: string]: any };
+
 type HeadersDict = HeadersInit;
 const bearerHeaders = (token?: string | null): HeadersDict => {
   const h: Record<string, string> = { Accept: "application/json" };
@@ -258,6 +275,17 @@ export default function CorporateCreateLoadPage() {
   const [distanceKm, setDistanceKm] = React.useState<number>(0);
   const [distanceLoading, setDistanceLoading] = React.useState(false);
   const [distanceError, setDistanceError] = React.useState<string | null>(null);
+
+  const [commissionRate, setCommissionRate] = React.useState<number | null>(
+    null
+  );
+  const [commissionDescription, setCommissionDescription] = React.useState<
+    number | null
+  >(null);
+  const [commissionLoading, setCommissionLoading] = React.useState(false);
+  const [commissionError, setCommissionError] = React.useState<string | null>(
+    null
+  );
 
   const [vehicleProducts, setVehicleProducts] = React.useState<
     VehicleProductUI[]
@@ -546,6 +574,44 @@ export default function CorporateCreateLoadPage() {
     return () => controller.abort();
   }, [pLat, pLng, dLat, dLng]);
 
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function loadCommission() {
+      setCommissionLoading(true);
+      setCommissionError(null);
+      try {
+        const res = await fetch("/yuksi/admin/users/commission/", {
+          cache: "no-store",
+          headers,
+        });
+        const j: CommissionMeResponse | any = await readJson(res);
+        if (!res.ok || j?.success === false)
+          throw new Error(pickMsg(j, `HTTP ${res.status}`));
+
+        const d = j?.data as CommissionMeDTO | undefined;
+        if (!d) throw new Error("Komisyon bilgisi bulunamadı.");
+
+        if (!cancelled) {
+          const rate = Number(d.commissionRate ?? 0);
+          setCommissionRate(Number.isFinite(rate) ? rate : 0);
+          setCommissionDescription(d.commissionDescription ?? null);
+        }
+      } catch (e: any) {
+        if (!cancelled) {
+          setCommissionRate(null);
+          setCommissionError(e?.message || "Komisyon oranı getirilemedi.");
+        }
+      } finally {
+        if (!cancelled) setCommissionLoading(false);
+      }
+    }
+    loadCommission();
+    return () => {
+      cancelled = true;
+    };
+  }, [headers]);
+
   const baseKmPrice = React.useMemo(() => {
     if (!cityPrices.length) return 0;
 
@@ -562,7 +628,9 @@ export default function CorporateCreateLoadPage() {
     if (!match)
       match = cityPrices.find((p) => p.stateName.toLowerCase() === state);
 
-    const selectedVehicle = vehicleProducts.find((v) => v.id  === vehicleProductId);
+    const selectedVehicle = vehicleProducts.find(
+      (v) => v.id === vehicleProductId
+    );
     const template = selectedVehicle?.template || vehicleType;
 
     return pickCityBasePriceByTemplate(match, template, carrierType);
@@ -592,6 +660,19 @@ export default function CorporateCreateLoadPage() {
   );
 
   const computedTotal = basePrice + extrasTotal;
+
+  const corporateCommission = React.useMemo(() => {
+    if (!commissionRate || commissionRate <= 0 || !computedTotal) return 0;
+    return Math.round((computedTotal * commissionRate) / 100);
+  }, [commissionRate, computedTotal]);
+
+  const carrierPayment = React.useMemo(
+    () =>
+      computedTotal && corporateCommission
+        ? computedTotal - corporateCommission
+        : 0,
+    [computedTotal, corporateCommission]
+  );
 
   const toggleExtra = (id: string) =>
     setExtrasSelected((p) => ({ ...p, [id]: !p[id] }));
@@ -653,7 +734,7 @@ export default function CorporateCreateLoadPage() {
     const normDropoffAddress = normalizeAddress(dropoffAddress);
 
     const body = {
-      campaignCode: couponApplied || (coupon.trim() || undefined),
+      campaignCode: couponApplied || coupon.trim() || undefined,
 
       carrierType,
       deliveryType: deliveryTypeAPI,
@@ -728,7 +809,9 @@ export default function CorporateCreateLoadPage() {
     }
   }
 
-  const selectedVehicle = vehicleProducts.find((v) => v.id === vehicleProductId);
+  const selectedVehicle = vehicleProducts.find(
+    (v) => v.id === vehicleProductId
+  );
 
   return (
     <form onSubmit={submit} className="space-y-6">
@@ -830,7 +913,9 @@ export default function CorporateCreateLoadPage() {
               value={vehicleProductId}
               onChange={(e) => {
                 setVehicleProductId(e.target.value);
-                const v = vehicleProducts.find((vv) => vv.id === e.target.value);
+                const v = vehicleProducts.find(
+                  (vv) => vv.id === e.target.value
+                );
                 if (v) setVehicleType(v.template);
               }}
               className="w-full rounded-xl border border-neutral-300 bg-neutral-100 px-3 py-2 outline-none ring-2 ring-transparent transition focus:bg-white focus:ring-sky-200"
@@ -843,15 +928,20 @@ export default function CorporateCreateLoadPage() {
               ))}
             </select>
             {vehicleProductsLoading && (
-              <p className="mt-1 text-xs text-neutral-500">Araç ürünleri yükleniyor...</p>
+              <p className="mt-1 text-xs text-neutral-500">
+                Araç ürünleri yükleniyor...
+              </p>
             )}
             {vehicleProductsError && (
-              <p className="mt-1 text-xs text-rose-600">{vehicleProductsError}</p>
+              <p className="mt-1 text-xs text-rose-600">
+                {vehicleProductsError}
+              </p>
             )}
             {selectedVehicle && (
               <p className="mt-1 text-xs text-neutral-500">
                 Seçilen şablon:
-                {VEHICLE_TEMPLATE_LABEL[selectedVehicle.template] ?? selectedVehicle.template}
+                {VEHICLE_TEMPLATE_LABEL[selectedVehicle.template] ??
+                  selectedVehicle.template}
               </p>
             )}
           </div>
@@ -1010,6 +1100,39 @@ export default function CorporateCreateLoadPage() {
             <div>
               <span className="font-semibold">Genel Toplam: </span>
               {computedTotal}₺
+            </div>
+          </div>
+
+          <div className="self-end text-sm">
+            <div className="mb-1">
+              <div className="font-semibold">Komisyon Oranı: </div>
+              {commissionLoading
+                ? "Yükleniyor..."
+                : commissionRate !== null
+                ? `${commissionRate}%`
+                : "Tanımlı Değil"}
+            </div>
+            {commissionError && (
+              <div className="mb-1 text-xs text-rose-700">
+                {commissionError}
+              </div>
+            )}
+            {commissionDescription && (
+              <div className="mb-1 text-xs text-neutral-500">
+                {commissionDescription}
+              </div>
+            )}
+            <div>
+              <span className="font-semibold">Bayi Komisyonu: </span>
+              {commissionRate != null && commissionRate > 0 && computedTotal > 0
+                ? `${corporateCommission}₺ (toplam ${computedTotal}₺ × ${commissionRate}% - bayinin alacağı ödeme)`
+                : "-"}
+            </div>
+            <div>
+              <span className="font-semibold">Taşıyıcı Ödemesi: </span>
+              {commissionRate != null && commissionRate > 0 && computedTotal > 0
+                ? `${carrierPayment}₺ (taşıyıcının alacağı ödeme)`
+                : "-"}
             </div>
           </div>
         </div>

@@ -116,7 +116,7 @@ export default function CorporateProfilePage() {
                    countryId: data.countryId ?? 0,
                    stateId: data.stateId ?? 0,
                    cityId: data.cityId ?? 0,
-                   tax_office: data.taz_office ?? "",
+                   tax_office: data.tax_office ?? "",
                    tax_number: data.tax_number ?? "",
                    iban: data.iban ?? "",
                    resume: data.resume ?? "",
