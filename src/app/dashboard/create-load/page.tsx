@@ -1123,7 +1123,7 @@ export default function CorporateCreateLoadPage() {
               </div>
             )}
             <div>
-              <span className="font-semibold">Bayi Komisyonu: </span>
+              <span className="font-semibold">Kurumsal Üye Komisyonu: </span>
               {commissionRate != null && commissionRate > 0 && computedTotal > 0
                 ? `${corporateCommission}₺ (toplam ${computedTotal}₺ × ${commissionRate}% - bayinin alacağı ödeme)`
                 : "-"}

@@ -33,6 +33,8 @@ type CorporateJob = {
   id: string;
   deliveryType: "immediate" | "scheduled";
   carrierType: string;
+  commissionRate?: number;
+  commissionDescription?: string;
   vehicleType: string;
   pickupAddress: string;
   dropoffAddress: string;
@@ -112,6 +114,8 @@ export default function CorporateLogisticsTrackingPage() {
         deliveryType:
           x?.deliveryType === "scheduled" ? "scheduled" : "immediate",
         carrierType: String(x?.carrierType ?? ""),
+        commissionRate: Number(x?.commissionRate ?? 0) || undefined,
+        commissionDescription: String(x?.commissionDescription ?? undefined),
         vehicleType: String(x?.vehicleType ?? ""),
         pickupAddress: String(x?.pickupAddress ?? ""),
         dropoffAddress: String(x?.dropoffAddress ?? ""),
@@ -246,7 +250,7 @@ export default function CorporateLogisticsTrackingPage() {
             Yük Listesi (Kurumsal)
           </h1>
           <p className="text-sm text-neutral-600">
-            Bayinin oluşturduğu yükleri görüntüle.
+            Kurumsal üyenin oluşturduğu yükleri görüntüle.
           </p>
         </div>
       </div>
@@ -322,85 +326,122 @@ export default function CorporateLogisticsTrackingPage() {
       )}
 
       {/* Table */}
-      <section className="rounded-2xl border border-neutral-200 bg-white shadow-sm">
+      <section className="rounded-2xl border border-neutral-200/70 bg-white shadow-sm text-center">
         <div className="overflow-x-auto">
-          <table className="min-w-full table-fixed">
-            <thead>
-              <tr className="text-left text-xs md:text-sm text-neutral-500">
-                <th className="px-6 py-3 font-medium">ID</th>
-                <th className="px-6 py-3 font-medium">Teslim Tipi</th>
-                <th className="px-6 py-3 font-medium">Taşıyıcı / Araç</th>
-                <th className="px-6 py-3 font-medium">Alım</th>
-                <th className="px-6 py-3 font-medium">Teslim</th>
-                <th className="px-6 py-3 font-medium">Fiyat</th>
-                <th className="px-6 py-3 font-medium">Ödeme</th>
-                <th className="px-6 py-3 font-medium">Oluşturma</th>
-                <th className="px-6 py-3 font-medium">İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-t text-xs md:text-sm">
-                  <td className="px-6 py-3">{r.id}</td>
-                  <td className="px-6 py-3">
-                    {r.deliveryType === "immediate" ? (
-                      "immediate"
-                    ) : (
-                      <span
-                        title={`${r.deliveryDate ?? ""} ${
-                          r.deliveryTime ?? ""
-                        }`}
-                      >
-                        scheduled
+          <div className="min-w-full border-t border-neutral-200/70">
+            <div className="hidden md:grid md:grid-cols-9 text-sm text-neutral-500 border-b text-center">
+              <div className="px-6 py-3 font-medium">ID</div>
+              <div className="px-6 py-3 font-medium">Teslim Tipi</div>
+              <div className="px-6 py-3 font-medium">Taşıyıcı / Araç</div>
+              <div className="px-6 py-3 font-medium">Alım</div>
+              <div className="px-6 py-3 font-medium">Teslim</div>
+              <div className="px-6 py-3 font-medium">Fiyat</div>
+              <div className="px-6 py-3 font-medium">Ödeme</div>
+              <div className="px-6 py-3 font-medium">Oluşturma</div>
+              <div className="px-6 py-3 font-medium">İşlemler</div>
+            </div>
+            {rows.map((r) => (
+              <div
+                key={r.id}
+                className="border-b border-neutral-200/70 md:grid md:grid-cols-9 hover:bg-neutral-50 bg-[#FFF4EE]"
+              >
+                <div className="px-6 py-3">{r.id}</div>
+                <div className="px-3 py-3 text-center md:text-left">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    Teslim Tipi
+                  </div>
+                  {r.deliveryType === "immediate" ? (
+                    "immediate"
+                  ) : (
+                    <span
+                      title={`${r.deliveryDate ?? ""} ${r.deliveryTime ?? ""}`}
+                    >
+                      scheduled
+                    </span>
+                  )}
+                </div>
+                <div className="px-6 py-3">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    Taşıyıcı / Araç
+                  </div>
+                  {r.carrierType} • {r.vehicleType}
+                </div>
+                <div className="px-6 py-3">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    Alım
+                  </div>
+                  {r.pickupAddress}
+                </div>
+                <div className="px-6 py-3">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    Teslim
+                  </div>
+                  {r.dropoffAddress}
+                </div>
+                <div className="px-6 py-3">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    Fiyat
+                  </div>
+                  {r.totalPrice != null ? `${r.totalPrice}₺` : "—"}
+                  <div>
+                    {r.commissionRate != null && r.commissionRate > 0 && (
+                      <span className="text-xs text-neutral-500">
+                        Komisyon: {`${ r.totalPrice! *  r.commissionRate / 100 } (${r.commissionRate}%)`} <br />
+                        Taşıyıcı Ödemesi: {`${ r.totalPrice! - ( r.totalPrice! *  r.commissionRate / 100) }₺`}
                       </span>
                     )}
-                  </td>
-                  <td className="px-6 py-3">
-                    {r.carrierType} • {r.vehicleType}
-                  </td>
-                  <td className="px-6 py-3">{r.pickupAddress}</td>
-                  <td className="px-6 py-3">{r.dropoffAddress}</td>
-                  <td className="px-6 py-3">
-                    {r.totalPrice != null ? `${r.totalPrice}₺` : "—"}
-                  </td>
-                  <td className="px-6 py-3">{r.paymentMethod ?? "—"}</td>
-                  <td className="px-6 py-3">{fmtDT(r.createdAt)}</td>
-                  <td className="px-6 py-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() => showRoute(r)}
-                        className="rounded-md bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-700"
-                      >
-                        Haritada Göster
-                      </button>
-                      <button
-                        onClick={() => showEdit(r)}
-                        className="rounded-md bg-green-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-600"
-                      >
-                        Düzenle
-                      </button>
-                      <button
-                        onClick={() => onDelete(r.id)}
-                        className="rounded-md bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600"
-                      >
-                        Sil
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {rows.length === 0 && !loading && (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="px-6 py-10 text-center text-sm text-neutral-500"
-                  >
-                    Kayıt bulunamadı.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+                <div className="px-6 py-3">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    Ödeme
+                  </div>
+                  {r.paymentMethod ?? "—"}
+                  </div>
+                <div className="px-6 py-3">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    Oluşturma
+                  </div>  
+                  {fmtDT(r.createdAt)}
+                </div>
+                <div className="px-6 py-3">
+                  <div className="md:hidden text-[11px] text-neutral-500">
+                    İşlemler
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 justify-center">
+                    <button
+                      onClick={() => showRoute(r)}
+                      className="rounded-md bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-700"
+                    >
+                      Haritada Göster
+                    </button>
+                    <button
+                      onClick={() => showEdit(r)}
+                      className="rounded-md bg-green-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-600"
+                    >
+                      Düzenle
+                    </button>
+                    <button
+                      onClick={() => onDelete(r.id)}
+                      className="rounded-md bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600"
+                    >
+                      Sil
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {rows.length === 0 && !loading && (
+              <div>
+                <div
+                  colSpan={9}
+                  className="px-6 py-10 text-center text-sm text-neutral-500"
+                >
+                  Kayıt bulunamadı.
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         {loading && (
           <div className="px-6 py-3 text-sm text-neutral-500">Yükleniyor…</div>
@@ -472,7 +513,9 @@ export default function CorporateLogisticsTrackingPage() {
 
             <div className="max-h-[75vh] overflow-auto grid gap-4 p-1 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium">Taşıyıcı Tipi</label>
+                <label className="mb-1 block text-sm font-medium">
+                  Taşıyıcı Tipi
+                </label>
                 <select
                   value={editing.carrierType ?? ""}
                   onChange={(e) =>
