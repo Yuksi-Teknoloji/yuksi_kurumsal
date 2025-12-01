@@ -87,8 +87,6 @@ type CommissionMeResponse = {
   data?: CommissionMeDTO;
 };
 
-type JwtPayload = { userId?: string; sub?: string; [k: string]: any };
-
 type HeadersDict = HeadersInit;
 const bearerHeaders = (token?: string | null): HeadersDict => {
   const h: Record<string, string> = { Accept: "application/json" };

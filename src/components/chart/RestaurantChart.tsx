@@ -109,10 +109,9 @@ enum StatusTr {
 
 interface ChartPieProps {
   data: Array<{ status: string; [key: string]: any }>;
-  title?: string;
 }
 
-export function ChartPie({ data, title }: ChartPieProps) {
+export function ChartPie({ data }: ChartPieProps) {
   const orderByStatus = data.reduce((acc: { [key: string]: number }, o) => {
     const status = o.status;
     acc[status] = (acc[status] || 0) + 1;
