@@ -17,67 +17,6 @@ async function readJson<T = unknown>(
 const pickMsg = (j: any, fb: string) =>
   j?.message || j?.detail || j?.title || fb;
 
-function collectErrors(x: any): string {
-  const msgs: string[] = [];
-  if (x?.message) msgs.push(String(x.message));
-  if (x?.data?.message) msgs.push(String(x.data.message));
-  const err = x?.errors || x?.error || x?.detail;
-  if (Array.isArray(err)) {
-    err.forEach((e: any) => {
-      if (typeof e === "string") msgs.push(e);
-      else if (e && typeof e === "object") {
-        const loc = Array.isArray(e.loc)
-          ? e.loc.join(".")
-          : String(e.loc) ?? "";
-        const m = String(e.msg ?? e.message ?? e.detail ?? "");
-        if (loc && m) msgs.push(`${loc}: ${m}`);
-        else if (m) msgs.push(m);
-      }
-    });
-  } else if (err && typeof err === "object") {
-    for (const [k, v] of Object.keys(err)) {
-      if (Array.isArray(v))
-        (v as any[]).forEach((ei) => {
-          msgs.push(`${k}: ${String(ei)}`);
-        });
-      else if (typeof v === "string") msgs.push(`${k}: ${v}`);
-    }
-  }
-  return msgs.join(" | ");
-}
-
-function getDayRange() {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(now.getDate() + 1);
-  return { start: now, end: tomorrow };
-}
-
-function getWeekRange() {
-  const now = new Date();
-  const day = now.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMonday);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 7);
-  return { start: monday, end: sunday };
-}
-
-function getMonthRange() {
-  const now = new Date();
-  const first = new Date(now.getFullYear(), now.getMonth());
-  const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  return { start: first, end: last };
-}
-
-function formatDateYMD(dt: Date) {
-  const y = dt.getFullYear();
-  const m = String(dt.getMonth() + 1).padStart(2, "0");
-  const d = String(dt.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
 type CorporateJob = {
   id: string;
   totalPrice?: number;
@@ -96,8 +35,6 @@ export default function Charts() {
   );
 
   const [data, setData] = React.useState<CorporateJob[]>([]);
-
-  const [loads, setLoads] = React.useState<any[]>([]);
   const [error, setError] = React.useState<string | null>(null);
 
   async function loadList() {

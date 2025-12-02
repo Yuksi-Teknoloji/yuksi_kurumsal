@@ -45,7 +45,7 @@ export function ChartBar({
       <Tooltip formatter={(value, name) => [
         value + " tl" , name
       ]}/>
-      <Bar dataKey="value" fill="#8884d8" />
+      <Bar dataKey="value" barSize={50} fill="#8884d8" />
     </BarChart>
   );
 }
