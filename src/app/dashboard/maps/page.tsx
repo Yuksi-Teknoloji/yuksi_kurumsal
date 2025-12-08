@@ -7,7 +7,7 @@ import { getAuthToken } from "@/src/utils/auth";
 import { Header } from "next/dist/lib/load-custom-routes";
 
 const LiveLeafletMap = dynamic(
-    () => import("@/src/components/map/LiveLeafletMap").then((mod) => mod.LiveLeafletMap),
+    () => import("@/src/components/map/LiveLeaflet").then((mod) => mod.default),
     { ssr: false }
 );
 
